@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Reserve a table at La Luna Bistro." />
+    <title>La Luna Bistro — Reservation</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header>
+      <nav>
+        <a href="index.html">Home</a>
+        <a href="menu.html">Menu</a>
+        <a href="reservation.html" aria-current="page">Reservations</a>
+        <a href="hours.html">Hours &amp; Location</a>
+      </nav>
+    </header>
+
+    <main>
+      <section id="reservation">
+        <h1>Reserve a table</h1>
+        <h2>Reservation details</h2>
+        <p>Choose a date, a time, and the number of guests. We confirm by email.</p>
+        <form action="reservation.html" method="post">
+          <p>
+            <label for="full-name">Full name</label><br />
+            <input id="full-name" name="full-name" type="text" />
+          </p>
+          <p>
+            <label for="email">Email</label><br />
+            <input id="email" name="email" type="email" />
+          </p>
+          <p>
+            <label for="password">Password to view this booking later</label><br />
+            <input id="password" name="password" type="password" />
+          </p>
+          <p>
+            <label for="visit-date">Date</label><br />
+            <input id="visit-date" name="visit-date" type="date" />
+          </p>
+          <p>
+            <label for="guests">Number of guests</label><br />
+            <input id="guests" name="guests" type="number" min="1" max="8" value="1" />
+          </p>
+
+          <fieldset>
+            <legend>Time</legend>
+            <label for="time-6">
+              <input id="time-6" type="radio" name="time" value="18:00" />
+              6:00 PM
+            </label>
+            <label for="time-730">
+              <input id="time-730" type="radio" name="time" value="19:30" />
+              7:30 PM
+            </label>
+            <label for="time-9">
+              <input id="time-9" type="radio" name="time" value="21:00" />
+              9:00 PM
+            </label>
+          </fieldset>
+
+          <fieldset>
+            <legend>Seating</legend>
+            <label for="indoor">
+              <input id="indoor" type="radio" name="seating" value="indoor" />
+              Indoor
+            </label>
+            <label for="terrace">
+              <input id="terrace" type="radio" name="seating" value="terrace" />
+              Terrace
+            </label>
+          </fieldset>
+
+          <p>
+            <label for="birthday">
+              <input id="birthday" name="birthday" type="checkbox" />
+              This reservation is for a birthday
+            </label>
+          </p>
+
+          <button type="submit">Request reservation</button>
+        </form>
+      </section>
+      <aside>
+        <h2>Before you book</h2>
+        <p>We keep each table for 90 minutes. Parties larger than 8 should email us first.</p>
+      </aside>
+    </main>
+  </body>
+</html>
