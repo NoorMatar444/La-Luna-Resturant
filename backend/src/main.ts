@@ -1,11 +1,16 @@
-import { ValidationPipe } from '@nestjs/common';
+import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
+import type { Request, Response } from 'express';
 import { AppModule } from './app.module';
 
-async function bootstrap() {
+async function createApp(): Promise<INestApplication> {
   const app = await NestFactory.create(AppModule);
-  // The Vite app runs on port 5173 and calls this API from the browser.
-  app.enableCors({ origin: 'http://localhost:5173' });
+  // FRONTEND_URL can list several sites, separated by commas.
+  const origins = (process.env.FRONTEND_URL ?? 'http://localhost:5173')
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+  app.enableCors({ origin: origins });
   // Drop unknown fields and convert request strings into the DTO types.
   app.useGlobalPipes(
     new ValidationPipe({
@@ -13,6 +18,20 @@ async function bootstrap() {
       transform: true,
     }),
   );
-  await app.listen(process.env.PORT ?? 3000);
+  return app;
 }
-bootstrap();
+
+let server: Promise<(req: Request, res: Response) => void> | undefined;
+
+// Vercel calls this exported handler instead of opening a port.
+export default async function handler(req: Request, res: Response) {
+  server ??= createApp().then(async (app) => {
+    await app.init();
+    return app.getHttpAdapter().getInstance();
+  });
+  (await server)(req, res);
+}
+
+if (!process.env.VERCEL) {
+  void createApp().then((app) => app.listen(process.env.PORT ?? 3000));
+}

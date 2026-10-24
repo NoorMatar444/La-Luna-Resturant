@@ -5,11 +5,11 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { TokenEnum } from 'src/common/enums/token.enum';
-import { RoleEnum } from 'src/common/enums/user.enum';
-import { EmailService } from 'src/common/services/email.services';
-import { RedisService } from 'src/common/services/redis.service';
-import { UserRepo } from 'src/repo/user.repo';
+import { TokenEnum } from '../../common/enums/token.enum';
+import { RoleEnum } from '../../common/enums/user.enum';
+import { EmailService } from '../../common/services/email.services';
+import { RedisService } from '../../common/services/redis.service';
+import { UserRepo } from '../../repo/user.repo';
 import { SecurityService } from '../../common/security/securityServive';
 import { TokenService } from '../../common/services/token.services';
 import { SignInDto, SignUpDto } from './auth.dto';

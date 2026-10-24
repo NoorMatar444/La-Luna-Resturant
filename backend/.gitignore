@@ -2,3 +2,5 @@ dist
 coverage
 data
 .env
+.vercel
+.env*

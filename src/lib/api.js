@@ -1,3 +1,6 @@
+// Empty in local dev, where Vite proxies /auth and /reservations to Nest.
+const API_URL = (import.meta.env.VITE_API_URL ?? "").replace(/\/$/, "")
+
 export async function api(path, { method = "GET", body, token } = {}) {
   const headers = {}
   if (body !== undefined) {
@@ -9,7 +12,7 @@ export async function api(path, { method = "GET", body, token } = {}) {
 
   let response
   try {
-    response = await fetch(path, {
+    response = await fetch(`${API_URL}${path}`, {
       method,
       headers,
       body: body === undefined ? undefined : JSON.stringify(body),
