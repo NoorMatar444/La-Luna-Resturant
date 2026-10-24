@@ -1,4 +1,5 @@
 import React from "react";
+import diningRoom from "../../images/dining-room.jpg";
 
 export default function Home() {
   return (
@@ -18,7 +19,7 @@ export default function Home() {
           </div>
           <div className="md:col-span-2">
             <img
-              src="../../images/dining-room.jpg"
+              src={diningRoom}
               alt="dining room"
               className="h-72 w-full rounded-xl bg-[#14233c]/10 object-cover md:h-80"
             />
