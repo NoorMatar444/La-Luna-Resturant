@@ -146,9 +146,11 @@ export class AuthService {
   }
 
   async refreshToken(refreshToken: string) {
+    // checkToken only accepts an Authorization header value.
     const authorization = refreshToken.startsWith('Bearer ')
       ? refreshToken
       : `Bearer ${refreshToken}`;
+    // REFRESH selects the refresh signature, so an access token is rejected.
     const { user, verifiedToken } = await this.TokenService.checkToken({
       authorization,
       tokenType: TokenEnum.REFRESH,
@@ -157,11 +159,13 @@ export class AuthService {
     if (verifiedToken.jti) {
       const revokedKey = `revoked:${verifiedToken.jti}`;
       await this.RedisService.set({ key: revokedKey, value: '1' });
+      // A refresh token lives for one year, so the block lasts that long too.
       await this.RedisService.expire({
         key: revokedKey,
         seconds: 60 * 60 * 24 * 365,
       });
     }
+    // New pair, new shared id, signed for this user's role.
     return this.TokenService.generateAccessAndRefreshTokens(user.role, user);
   }
 
