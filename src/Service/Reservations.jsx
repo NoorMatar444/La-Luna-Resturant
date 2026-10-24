@@ -1,7 +1,10 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Controller, useForm } from "react-hook-form"
+import { Link } from "react-router-dom"
 import { z } from "zod"
+
+import { api, getAccessToken } from "@/lib/api"
 
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -20,11 +23,14 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 const inputClass =
   "h-auto w-full max-w-[420px] rounded-lg border-[#d7cbb8] bg-[#fffaf3] px-2.5 py-2.5 font-[inherit] text-base shadow-none"
 
+// The default border matches the cream page. This one shows on it.
+const controlClass =
+  "border-[#8a6232] bg-[#fffaf3] data-checked:border-[#14233c] data-checked:bg-[#14233c]"
+
 // Checked on submit. An empty required field blocks onSubmit.
 const formSchema = z.object({
   fullName: z.string().min(1, "Enter your full name."),
   email: z.email("Enter a valid email so we can confirm."),
-  password: z.string().min(1, "Enter a password to view this booking later."),
   visitDate: z.string().min(1, "Choose a date."),
   // The number input sends a string. coerce turns "2" into 2 before min and max.
   guests: z.coerce
@@ -56,12 +62,14 @@ function formatTime(value) {
 export default function Reservations() {
   // Filled after a valid submit. null hides the confirmation sentence.
   const [confirmation, setConfirmation] = useState(null)
+  const [profile, setProfile] = useState(null)
+  const [bookings, setBookings] = useState([])
+  const [error, setError] = useState(null)
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
       fullName: "",
       email: "",
-      password: "",
       visitDate: "",
       guests: 1,
       time: "",
@@ -70,9 +78,72 @@ export default function Reservations() {
     },
   })
 
-  function onSubmit(data) {
-    setConfirmation(data)
-    form.reset() // clear the fields; confirmation keeps the submitted copy
+  const { getValues, setValue } = form
+
+  useEffect(() => {
+    const token = getAccessToken()
+    if (!token) return
+    let ignore = false
+    api("/auth/profile", { token })
+      .then((user) => {
+        if (ignore) return
+        setProfile(user)
+        if (!getValues("fullName")) setValue("fullName", user.userName)
+        if (!getValues("email")) setValue("email", user.email)
+      })
+      .catch(() => {
+        if (!ignore) setProfile(null)
+      })
+    api("/reservations", { token })
+      .then((rows) => {
+        if (!ignore) setBookings(rows ?? [])
+      })
+      .catch(() => {
+        if (!ignore) setBookings([])
+      })
+    return () => {
+      ignore = true
+    }
+  }, [getValues, setValue])
+
+  async function onSubmit(data) {
+    setError(null)
+    const token = getAccessToken()
+    if (!token) {
+      setError("Sign in to request a reservation.")
+      return
+    }
+    try {
+      const saved = await api("/reservations", {
+        method: "POST",
+        token,
+        body: {
+          fullName: data.fullName,
+          email: data.email,
+          visitDate: data.visitDate,
+          guests: data.guests,
+          time: data.time,
+          seating: data.seating,
+          birthday: data.birthday,
+        },
+      })
+      setConfirmation(data)
+      setBookings((current) => [
+        saved,
+        ...current.filter((row) => row._id !== saved._id),
+      ])
+      form.reset({
+        fullName: data.fullName,
+        email: data.email,
+        visitDate: "",
+        guests: 1,
+        time: "",
+        seating: "",
+        birthday: false,
+      })
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong.")
+    }
   }
 
   return (
@@ -87,6 +158,16 @@ export default function Reservations() {
             Choose a date, a time, and the number of guests. We confirm by
             email.
           </p>
+          {profile ? (
+            <p className="my-[1em]">Booking as {profile.userName}.</p>
+          ) : (
+            <p className="my-[1em]">
+              <Link to="/signin" className="font-bold text-[#8a6232] underline">
+                Sign in
+              </Link>{" "}
+              to request a reservation.
+            </p>
+          )}
 
           {/* handleSubmit calls onSubmit only after every field passes the schema. */}
           <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-3">
@@ -102,6 +183,7 @@ export default function Reservations() {
                       {...field}
                       id="full-name"
                       type="text"
+                      autoComplete="name"
                       aria-invalid={fieldState.invalid}
                       className={inputClass}
                     />
@@ -123,29 +205,6 @@ export default function Reservations() {
                       id="email"
                       type="email"
                       autoComplete="email"
-                      aria-invalid={fieldState.invalid}
-                      className={inputClass}
-                    />
-                    {fieldState.invalid && (
-                      <FieldError errors={[fieldState.error]} />
-                    )}
-                  </Field>
-                )}
-              />
-
-              <Controller
-                name="password"
-                control={form.control}
-                render={({ field, fieldState }) => (
-                  <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel htmlFor="password">
-                      Password to view this booking later
-                    </FieldLabel>
-                    <Input
-                      {...field}
-                      id="password"
-                      type="password"
-                      autoComplete="new-password"
                       aria-invalid={fieldState.invalid}
                       className={inputClass}
                     />
@@ -218,6 +277,7 @@ export default function Reservations() {
                             id={time.id}
                             value={time.value}
                             aria-invalid={fieldState.invalid}
+                            className={controlClass}
                           />
                           <FieldLabel htmlFor={time.id}>{time.label}</FieldLabel>
                         </Field>
@@ -248,6 +308,7 @@ export default function Reservations() {
                             id={option.id}
                             value={option.value}
                             aria-invalid={fieldState.invalid}
+                            className={controlClass}
                           />
                           <FieldLabel htmlFor={option.id}>
                             {option.label}
@@ -270,6 +331,7 @@ export default function Reservations() {
                     <Checkbox
                       id="birthday"
                       name={field.name}
+                      className={controlClass}
                       checked={field.value}
                       // Radix may pass "indeterminate". Store only true or false.
                       onCheckedChange={(checked) =>
@@ -283,8 +345,16 @@ export default function Reservations() {
                 )}
               />
 
-              <Button type="submit" className="w-fit">
-                Request reservation
+              {error && <p className="my-[1em]">{error}</p>}
+
+              <Button
+                type="submit"
+                className="w-fit"
+                disabled={form.formState.isSubmitting || !profile}
+              >
+                {form.formState.isSubmitting
+                  ? "Requesting..."
+                  : "Request reservation"}
               </Button>
             </FieldGroup>
           </form>
@@ -299,6 +369,22 @@ export default function Reservations() {
               {confirmation.birthday ? ", birthday" : ""}). We will confirm at{" "}
               {confirmation.email}.
             </p>
+          )}
+
+          {bookings.length > 0 && (
+            <div className="my-[1em]">
+              <h2 className="my-[0.83em] text-[1.5em] font-bold">Your bookings</h2>
+              <ul className="list-disc pl-5">
+                {bookings.map((booking) => (
+                  <li key={booking._id}>
+                    {booking.visitDate} at {formatTime(booking.time)},{" "}
+                    {booking.guests}{" "}
+                    {booking.guests === 1 ? "guest" : "guests"}, {booking.seating}
+                    {booking.birthday ? ", birthday" : ""}
+                  </li>
+                ))}
+              </ul>
+            </div>
           )}
         </section>
 

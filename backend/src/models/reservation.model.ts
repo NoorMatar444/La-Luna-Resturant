@@ -9,6 +9,12 @@ export class Reservation {
   user!: Types.ObjectId;
 
   @Prop({ type: String, required: true })
+  fullName!: string;
+
+  @Prop({ type: String, required: true, lowercase: true })
+  email!: string;
+
+  @Prop({ type: String, required: true })
   visitDate!: string;
 
   @Prop({ type: Number, required: true, min: 1, max: 8 })

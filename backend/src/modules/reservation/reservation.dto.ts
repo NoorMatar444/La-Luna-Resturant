@@ -2,14 +2,24 @@ import { Type } from 'class-transformer';
 import {
   IsBoolean,
   IsDateString,
+  IsEmail,
   IsEnum,
   IsInt,
+  IsNotEmpty,
+  IsString,
   Max,
   Min,
 } from 'class-validator';
 import { SeatingEnum, TimeEnum } from '../../common/enums/reservation.enum';
 
 export class CreateReservationDto {
+  @IsString()
+  @IsNotEmpty({ message: 'Enter your full name.' })
+  fullName!: string;
+
+  @IsEmail({}, { message: 'Enter a valid email so we can confirm.' })
+  email!: string;
+
   @IsDateString({}, { message: 'Choose a date.' })
   visitDate!: string;
 

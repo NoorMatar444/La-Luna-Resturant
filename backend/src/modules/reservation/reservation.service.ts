@@ -21,6 +21,8 @@ export class ReservationService {
     return this.reservationRepo.create({
       data: {
         user: profile.id,
+        fullName: body.fullName.trim(),
+        email: body.email.trim().toLowerCase(),
         visitDate: body.visitDate,
         guests: body.guests,
         time: body.time,

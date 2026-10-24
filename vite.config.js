@@ -13,7 +13,15 @@ export default defineConfig({
   server: {
     proxy: {
       '/auth': 'http://localhost:3001',
-      '/reservations': 'http://localhost:3001',
+      '/reservations': {
+        target: 'http://localhost:3001',
+        // The page /reservations is the React route. Only API calls go to Nest.
+        bypass(req) {
+          if (req.headers.accept?.includes('text/html')) {
+            return '/index.html'
+          }
+        },
+      },
     },
   },
   resolve: {
