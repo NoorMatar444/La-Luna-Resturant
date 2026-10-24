@@ -10,6 +10,12 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), tailwindcss()],
+  server: {
+    proxy: {
+      '/auth': 'http://localhost:3001',
+      '/reservations': 'http://localhost:3001',
+    },
+  },
   resolve: {
     alias: {
       // Lets files import "@/components/..." instead of a long relative path.

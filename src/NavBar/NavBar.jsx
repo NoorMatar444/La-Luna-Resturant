@@ -46,6 +46,12 @@ export function Navbar() {
         <NavbarLink as={RouterLink} to="/hours-and-locations" active={pathname === "/hours-and-locations"}>
           Hours&Locations
         </NavbarLink>
+        <NavbarLink as={RouterLink} to="/signin" active={pathname === "/signin"}>
+          Sign in
+        </NavbarLink>
+        <NavbarLink as={RouterLink} to="/signup" active={pathname === "/signup"}>
+          Sign up
+        </NavbarLink>
       </NavbarCollapse>
     </FlowbiteNavbar>
   );
