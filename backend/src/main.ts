@@ -4,7 +4,8 @@ import type { Request, Response } from 'express';
 import { AppModule } from './app.module';
 
 async function createApp(): Promise<INestApplication> {
-  const app = await NestFactory.create(AppModule);
+  // rawBody keeps the exact bytes Stripe signed, on req.rawBody.
+  const app = await NestFactory.create(AppModule, { rawBody: true });
   // FRONTEND_URL can list several sites, separated by commas.
   const origins = (process.env.FRONTEND_URL ?? 'http://localhost:5173')
     .split(',')

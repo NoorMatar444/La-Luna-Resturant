@@ -12,7 +12,7 @@ import { AuthService } from './auth.service';
 @Module({
   imports: [UserModel, RedisModule],
   controllers: [AuthController],
-  exports: [AuthService],
+  exports: [AuthService, TokenService],
   providers: [
     AuthService,
     TokenService,

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Controller, useForm } from "react-hook-form"
-import { Link } from "react-router-dom"
+import { Link, useSearchParams } from "react-router-dom"
 import { z } from "zod"
 
 import { api, getAccessToken } from "@/lib/api"
@@ -65,6 +65,11 @@ export default function Reservations() {
   const [profile, setProfile] = useState(null)
   const [bookings, setBookings] = useState([])
   const [error, setError] = useState(null)
+  const [payingId, setPayingId] = useState(null)
+  // Stripe sends the guest back with ?session_id=... after paying, or ?cancelled=1.
+  const [params] = useSearchParams()
+  const paid = params.has("session_id")
+  const cancelled = params.get("cancelled") === "1"
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -142,6 +147,31 @@ export default function Reservations() {
         birthday: false,
       })
     } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong.")
+    }
+  }
+
+  async function payDeposit(booking) {
+    setError(null)
+    const token = getAccessToken()
+    if (!token) {
+      setError("Sign in to pay the deposit.")
+      return
+    }
+    setPayingId(booking._id)
+    try {
+      const data = await api(`/reservations/${booking._id}/checkout`, {
+        method: "POST",
+        token,
+      })
+      if (!data?.url) {
+        setError("Stripe did not return a checkout page.")
+        setPayingId(null)
+        return
+      }
+      window.location.assign(data.url)
+    } catch (err) {
+      setPayingId(null)
       setError(err instanceof Error ? err.message : "Something went wrong.")
     }
   }
@@ -345,6 +375,17 @@ export default function Reservations() {
                 )}
               />
 
+              {paid && (
+                <p className="my-[1em]">
+                  Deposit sent. Your booking shows it as paid once Stripe
+                  confirms.
+                </p>
+              )}
+              {cancelled && (
+                <p className="my-[1em]">
+                  The deposit was not paid. You can pay it from your bookings.
+                </p>
+              )}
               {error && <p className="my-[1em]">{error}</p>}
 
               <Button
@@ -381,6 +422,21 @@ export default function Reservations() {
                     {booking.guests}{" "}
                     {booking.guests === 1 ? "guest" : "guests"}, {booking.seating}
                     {booking.birthday ? ", birthday" : ""}
+                    {booking.paymentStatus === "paid" ? (
+                      " — deposit paid"
+                    ) : (
+                      <>
+                        {" "}
+                        <button
+                          type="button"
+                          className="rounded-lg bg-[#14233c] px-3 py-1.5 text-sm text-[#f4e1b5] disabled:opacity-50"
+                          disabled={payingId === booking._id}
+                          onClick={() => payDeposit(booking)}
+                        >
+                          {payingId === booking._id ? "Sending..." : "Pay deposit"}
+                        </button>
+                      </>
+                    )}
                   </li>
                 ))}
               </ul>

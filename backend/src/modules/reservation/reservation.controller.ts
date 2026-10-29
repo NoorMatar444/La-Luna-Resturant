@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Headers, Post } from '@nestjs/common';
+import { Body, Controller, Get, Headers, Param, Post } from '@nestjs/common';
 import { CreateReservationDto } from './reservation.dto';
 import { ReservationService } from './reservation.service';
 
@@ -17,5 +17,13 @@ export class ReservationController {
   @Get()
   listMine(@Headers('authorization') authorization: string | undefined) {
     return this.reservationService.listMine(authorization ?? '');
+  }
+
+  @Post(':id/checkout')
+  checkout(
+    @Headers('authorization') authorization: string | undefined,
+    @Param('id') id: string,
+  ) {
+    return this.reservationService.checkout(authorization ?? '', id);
   }
 }

@@ -7,6 +7,7 @@ import Menu from "./Menu/Menu";
 import SignIn from "./Auth/SignIn";
 import SignUp from "./Auth/SignUp";
 import ConfirmEmail from "./Auth/ConfirmEmail";
+import OrderSuccess from "./Orders/OrderSuccess";
 
 // Layout stays on screen for every page. Each child swaps into its Outlet.
 const router = createBrowserRouter([
@@ -16,6 +17,7 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <Home /> },
       { path: "menu", element: <Menu /> },
+      { path: "orders/success", element: <OrderSuccess /> },
       { path: "reservations", element: <Reservations /> },
       { path: "hours-and-locations", element: <HoursAndLocations /> },
       { path: "signin", element: <SignIn /> },

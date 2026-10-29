@@ -1,0 +1,16 @@
+# Host ports match DB_LOCAL_URL and REDIS_PORT in .env.
+services:
+  mongo:
+    image: mongo:7
+    ports:
+      - "27020:27017"
+    volumes:
+      - mongo-data:/data/db
+
+  redis:
+    image: redis:7
+    ports:
+      - "6381:6379"
+
+volumes:
+  mongo-data:

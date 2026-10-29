@@ -13,6 +13,16 @@ export default defineConfig({
   server: {
     proxy: {
       '/auth': 'http://localhost:3001',
+      '/products': 'http://localhost:3001',
+      '/orders': {
+        target: 'http://localhost:3001',
+        // /orders/success is the React page. API calls such as /orders/:id still go to Nest.
+        bypass(req) {
+          if (req.headers.accept?.includes('text/html')) {
+            return '/index.html'
+          }
+        },
+      },
       '/reservations': {
         target: 'http://localhost:3001',
         // The page /reservations is the React route. Only API calls go to Nest.

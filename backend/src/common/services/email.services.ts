@@ -37,7 +37,7 @@ export class EmailService {
         'Set USER_EMAIL in .env to the Gmail account that owns the app password.',
       );
     }
-    return this.transporter.sendMail({
+    await this.transporter.sendMail({
       from: this.from,
       to,
       subject,

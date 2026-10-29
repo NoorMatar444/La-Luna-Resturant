@@ -1,6 +1,7 @@
 import { MongooseModule, Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Types } from 'mongoose';
 import { SeatingEnum, TimeEnum } from '../common/enums/reservation.enum.js';
+import { PaymentStatusEnum } from '../common/enums/stripe.enum.js';
 import { User } from './user.model.js';
 
 @Schema({ timestamps: true })
@@ -28,6 +29,22 @@ export class Reservation {
 
   @Prop({ type: Boolean, default: false })
   birthday!: boolean;
+
+  @Prop({ type: String })
+  currency!: string;
+
+  @Prop({ type: String })
+  stripeSessionId?: string;
+
+  @Prop({
+    type: String,
+    enum: PaymentStatusEnum,
+    default: PaymentStatusEnum.PENDING,
+  })
+  paymentStatus!: PaymentStatusEnum;
+
+  @Prop({ type: Number })
+  depositAmount!: number;
 }
 
 export type HydratedReservation = HydratedDocument<Reservation>;
