@@ -3,6 +3,7 @@ import {
   ConflictException,
   Injectable,
   NotFoundException,
+  ServiceUnavailableException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { TokenEnum } from '../../common/enums/token.enum';
@@ -55,11 +56,19 @@ export class AuthService {
     });
     // One code per email, so a second signup does not erase the first.
     await this.RedisService.set({ key: `otp:${email}`, value: hashedOtp });
-    await this.EmailService.sendEmail({
-      to: email,
-      subject: 'confirm email otp',
-      text: otp,
-    });
+    try {
+      await this.EmailService.sendEmail({
+        to: email,
+        subject: 'confirm email otp',
+        text: otp,
+      });
+    } catch {
+      await this.RedisService.delete({ key: `otp:${email}` });
+      await this.UserRepo.findOneAndDelete({ filter: { _id: createdUser._id } });
+      throw new ServiceUnavailableException(
+        'Could not send the confirmation email. Check USER_EMAIL and APP_PASSWORD on the API.',
+      );
+    }
     return {
       id: createdUser._id,
       userName: createdUser.userName,
