@@ -3,7 +3,7 @@ import { EmailService } from '../../common/services/email.services';
 import { RedisModule } from '../../common/services/reids.module';
 import { TokenService } from '../../common/services/token.services';
 import { SecurityService } from '../../common/security/securityServive';
-import { UserRepo as TokenUserRepo } from '../../common/repo/user.repo';
+import { UserRepo as TokenUserRepo } from '../../repo/user.repo';
 import UserModel from '../../models/user.model';
 import { UserRepo } from '../../repo/user.repo';
 import { AuthController } from './auth.controller';

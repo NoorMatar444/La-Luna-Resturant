@@ -6,7 +6,7 @@ import { RoleEnum } from '../enums/user.enum.js';
 import { HydratedUser } from '../../models/user.model.js';
 import { TokenEnum } from '../enums/token.enum.js';
 import { RedisService } from './redis.service.js';
-import { UserRepo } from '../repo/user.repo.js';
+import { UserRepo } from '../../repo/user.repo.js';
 
 @Injectable()
 export class TokenService {

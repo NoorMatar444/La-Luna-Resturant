@@ -3,7 +3,6 @@ import { HydratedDocument, Types } from 'mongoose';
 import { PaymentStatusEnum } from '../common/enums/stripe.enum.js';
 import { User } from './user.model.js';
 
-// One row per purchase. paymentStatus becomes "paid" only in the Stripe webhook.
 @Schema({ collection: 'orders', timestamps: true })
 export class Order {
   @Prop({ type: Types.ObjectId, ref: User.name, required: true })

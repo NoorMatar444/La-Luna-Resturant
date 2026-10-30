@@ -16,7 +16,6 @@ import { AuthService } from '../auth/auth.service';
 import { ReservationService } from '../reservation/reservation.service';
 import { CheckoutDto } from './order.dto';
 
-// The evening menu. Prices are in piasters: 9000 is 90 EGP.
 const MENU = [
   {
     slug: 'warm-olives',
@@ -214,8 +213,7 @@ export class OrderService implements OnModuleInit {
       return { received: true };
     }
 
-    const session = event.data.object as Stripe.Checkout.Session;
-    // Stripe sends every checkout event here. Table deposits belong to reservations.
+    const session = event.data.object;
     if (session.metadata?.reservationId) {
       return this.reservationService.handleWebhook(rawBody, signature);
     }

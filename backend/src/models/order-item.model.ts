@@ -1,7 +1,6 @@
 import { MongooseModule, Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Types } from 'mongoose';
 
-// What was bought, and the price copied from products at the moment of purchase.
 @Schema({ collection: 'orderItems', timestamps: true })
 export class OrderItem {
   @Prop({ type: Types.ObjectId, ref: 'Order', required: true })
